@@ -4,8 +4,8 @@ __USAGE__: generate-test-files.sh [--auto]
     creates a set of files in ./data
     by default creates 100 files of 100 random bytes with 10 duplicates of each file
 
-    __OPTIONS__:
-        --auto : forces deletion of all previous test files (ie: skips the delete prompt)
+__OPTIONS__:
+    --auto : forces deletion of all previous test files (ie: skips the delete prompt)
 
 
 
