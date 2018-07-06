@@ -68,46 +68,37 @@ GenerateFileList() {
     sort -o $tmpfilelistp2 $tmpfilelistp1
 }
 
+DeDuplicate() {
+    echo "Symlinking duplicates to originals...  (Sorted)"
+
+    while read -rst5 cur_hash cur_ts cur_file
+    do
+
+        if [ "${cur_hash}" = "${last_hash}" ]
+        then
+            echo "===== DUPE : ${cur_hash} - ${cur_file}"
+            rm "${cur_file}"
+            ln -s "${first_file}" "${cur_file}"
+            chown ${first_file_owner}:${first_file_group} "${cur_file}"
+        else
+            if [ "${cur_hash}" != "${first_hash}" ]
+            then
+                first_hash=$cur_hash
+                first_file=$cur_file
+                first_file_owner=$(stat -c "%U" "${first_file}")
+                first_file_group=$(stat -c "%G" "${first_file}")
+
+                echo "===== ORIG : ${first_hash} - ${first_file}"
+            fi
+        fi
+
+        last_hash=$cur_hash
+        last_file=$cur_file
+    done < $tmpfilelistp2
+}
 
 CreateTempfiles
 GenerateFileList
+DeDuplicate
 
-echo "Symlinking duplicates to originals...  (Sorted)"
-OLDIFS="$IFS"
-IFS=$'\n'
-while read line
-do
-    cur_hash=$(echo "${line}" | awk ' { print $1 } ')
-    cur_file=$(echo "${line}" | awk ' { print $3 } ')
-
-    if [ "${cur_hash}" = "${last_hash}" ]
-    then
-    	echo "===== DUPE : ${cur_hash} - ${cur_file}"
-        rm "${cur_file}"
-        ln -s "${first_file}" "${cur_file}"
-        chown ${first_file_owner}:${first_file_group} "${cur_file}"
-    else
-        if [ "${cur_hash}" != "${first_hash}" ]
-        then
-            first_hash=$cur_hash
-            first_file=$cur_file
-            first_file_owner=$(stat -c "%U" "${first_file}")
-            first_file_group=$(stat -c "%G" "${first_file}")
-
-            echo "===== ORIG : ${first_hash} - ${first_file}"
-        fi
-    fi
-
-    last_hash=$cur_hash
-    last_file=$cur_file
-done < $tmpfilelistp2
-
-
-cat <<-EOF
-	tmpfilelistp1 = $tmpfilelistp1
-	tmpfilelistp2 = $tmpfilelistp2
-	EOF
-
-head -n5 $tmpfilelistp1
-head -n5 $tmpfilelistp2
-
+exit
