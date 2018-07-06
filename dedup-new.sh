@@ -20,20 +20,20 @@ first_file_owner=""
 first_file_group=""
 
 
-if [ "$(id -u)" != "0" ]; then
+if (( EUID != 0 )); then
    echo "This script must be run as root!" 
 #   exit 1
 fi
 
 
-if [ "$#" -ne 1 ]; then
+if (( ${#} != 1 )); then
     echo "Usage:"
     echo "  ${0##*/} /path/to/PhotoTranscoder"
     exit 1
 fi
 
 
-if [ ! -d $phototranscoder_path ]
+if [[ ! -d $phototranscoder_path ]]
 then
     echo "PhotoTranscoder path does not exist! - ${phototranscoder_path}"
     exit 1
@@ -74,14 +74,14 @@ DeDuplicate() {
     while read -rst5 cur_hash cur_ts cur_file
     do
 
-        if [ "${cur_hash}" = "${last_hash}" ]
+        if [[ "${cur_hash}" == "${last_hash}" ]]
         then
             echo "===== DUPE : ${cur_hash} - ${cur_file}"
             rm "${cur_file}"
             ln -s "${first_file}" "${cur_file}"
             chown --reference="${first_file}" "${cur_file}"
         else
-            if [ "${cur_hash}" != "${first_hash}" ]
+            if [[ "${cur_hash}" != "${first_hash}" ]]
             then
                 first_hash=$cur_hash
                 first_file=$cur_file
