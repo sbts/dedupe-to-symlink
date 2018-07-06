@@ -72,19 +72,19 @@ DeDuplicate() {
 
     while read -rst5 cur_hash cur_ts cur_file; do
 
-        if [[ "${cur_hash}" == "${last_hash}" ]]; then
+        if [[ "${cur_hash}" == "${first_hash}" ]]; then
             echo "===== DUPE : ${cur_hash} - ${cur_file}"
             rm "${cur_file}"
             ln -s "${first_file}" "${cur_file}"
             chown --reference="${first_file}" "${cur_file}"
-        elif [[ "${cur_hash}" != "${first_hash}" ]]; then
+        else
             first_hash=$cur_hash
             first_file=$cur_file
             echo "===== ORIG : ${first_hash} - ${first_file}"
         fi
 
-        last_hash=$cur_hash
-        last_file=$cur_file
+#        last_hash=$cur_hash
+#        last_file=$cur_file
     done < $tmpfilelistp2
 }
 
