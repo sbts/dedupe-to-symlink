@@ -79,15 +79,12 @@ DeDuplicate() {
             echo "===== DUPE : ${cur_hash} - ${cur_file}"
             rm "${cur_file}"
             ln -s "${first_file}" "${cur_file}"
-            chown ${first_file_owner}:${first_file_group} "${cur_file}"
+            chown --reference="${first_file}" "${cur_file}"
         else
             if [ "${cur_hash}" != "${first_hash}" ]
             then
                 first_hash=$cur_hash
                 first_file=$cur_file
-                first_file_owner=$(stat -c "%U" "${first_file}")
-                first_file_group=$(stat -c "%G" "${first_file}")
-
                 echo "===== ORIG : ${first_hash} - ${first_file}"
             fi
         fi
