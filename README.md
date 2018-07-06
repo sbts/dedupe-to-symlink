@@ -1,5 +1,3 @@
----
-
 ## generate-test-files.sh
 
 __USAGE__: generate-test-files.sh [--auto]
@@ -9,8 +7,6 @@ __USAGE__: generate-test-files.sh [--auto]
     __OPTIONS__:
         --auto : forces deletion of all previous test files (ie: skips the delete prompt)
 
-
----
 
 
 ## dedup-new.sh
