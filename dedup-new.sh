@@ -17,7 +17,7 @@ first_file=""
 
 if (( EUID != 0 )); then
    echo "This script must be run as root!" 
-#   exit 1
+   exit 1
 fi
 
 
@@ -38,7 +38,7 @@ echo "Please ensure Plex is stopped and you have a backup before continuing."
 echo "This process can take hours to complete."
 echo ""
 echo "Press ENTER when ready."
-#read
+read
 
 CleanupTempFiles() {
     rm $tmpfilelistp1
