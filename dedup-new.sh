@@ -46,27 +46,33 @@ echo ""
 echo "Press ENTER when ready."
 #read
 
+CleanupTempFiles() {
+    rm $tmpfilelistp1
+    rm $tmpfilelistp2
+}
 
-echo "Generating list of files (part 1)..."
-tmpfilelistp1=$(mktemp)
-#find "${phototranscoder_path}" -type f -printf "%C@\t" -exec md5sum "{}" \; > $tmpfilelistp1
-while read -rst240 Ts Sum Name ; do
-    printf '%s %s %s\n' "$Sum" "$Ts" "$Name" >> $tmpfilelistp1
-done < <( find "${phototranscoder_path}" -type f -printf "%C@\t" -exec md5sum "{}" \; )
-
-
-#echo "Generating list of files (part 2)..."
-#tmpfilelistp2=$(mktemp)
-#cat $tmpfilelistp1 | awk ' { print $2"\t"$1"\t"$3 } ' > $tmpfilelistp2
+CreateTempfiles() {
+    trap CleanupTempFiles EXIT
+    tmpfilelistp1=$(mktemp)
+    tmpfilelistp2=$(mktemp)
+}
 
 
-echo "Generating list of files (part 3)..."
-tmpfilelistp3=$(mktemp)
-cat $tmpfilelistp1 | sort > $tmpfilelistp3
-#sort -o $tmpfilelistp3 $tmpfilelistp2
+GenerateFileList() {
+    echo "Generating list of files (part 1)...  (Unsorted)"
+    while read -rst240 Ts Sum Name ; do
+        printf '%s %s %s\n' "$Sum" "$Ts" "$Name" >> $tmpfilelistp1
+    done < <( find "${phototranscoder_path}" -type f -printf "%C@\t" -exec md5sum "{}" \; )
+
+    echo "Generating list of files (part 2)...  (Sorted)"
+    sort -o $tmpfilelistp2 $tmpfilelistp1
+}
 
 
-echo "Symlinking duplicates to originals..."
+CreateTempfiles
+GenerateFileList
+
+echo "Symlinking duplicates to originals...  (Sorted)"
 OLDIFS="$IFS"
 IFS=$'\n'
 while read line
@@ -94,16 +100,14 @@ do
 
     last_hash=$cur_hash
     last_file=$cur_file
-done < $tmpfilelistp3
+done < $tmpfilelistp2
 
 
 cat <<-EOF
 	tmpfilelistp1 = $tmpfilelistp1
 	tmpfilelistp2 = $tmpfilelistp2
-	tmpfilelistp3 = $tmpfilelistp3
 	EOF
 
 head -n5 $tmpfilelistp1
-#head -n5 $tmpfilelistp2
-head -n5 $tmpfilelistp3
+head -n5 $tmpfilelistp2
 
