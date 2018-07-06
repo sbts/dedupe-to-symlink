@@ -33,8 +33,7 @@ if (( ${#} != 1 )); then
 fi
 
 
-if [[ ! -d $phototranscoder_path ]]
-then
+if [[ ! -d $phototranscoder_path ]]; then
     echo "PhotoTranscoder path does not exist! - ${phototranscoder_path}"
     exit 1
 fi
@@ -71,22 +70,17 @@ GenerateFileList() {
 DeDuplicate() {
     echo "Symlinking duplicates to originals...  (Sorted)"
 
-    while read -rst5 cur_hash cur_ts cur_file
-    do
+    while read -rst5 cur_hash cur_ts cur_file; do
 
-        if [[ "${cur_hash}" == "${last_hash}" ]]
-        then
+        if [[ "${cur_hash}" == "${last_hash}" ]]; then
             echo "===== DUPE : ${cur_hash} - ${cur_file}"
             rm "${cur_file}"
             ln -s "${first_file}" "${cur_file}"
             chown --reference="${first_file}" "${cur_file}"
-        else
-            if [[ "${cur_hash}" != "${first_hash}" ]]
-            then
-                first_hash=$cur_hash
-                first_file=$cur_file
-                echo "===== ORIG : ${first_hash} - ${first_file}"
-            fi
+        elif [[ "${cur_hash}" != "${first_hash}" ]]; then
+            first_hash=$cur_hash
+            first_file=$cur_file
+            echo "===== ORIG : ${first_hash} - ${first_file}"
         fi
 
         last_hash=$cur_hash
