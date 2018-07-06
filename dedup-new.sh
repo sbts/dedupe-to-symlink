@@ -9,15 +9,10 @@
 
 read -rst5 phototranscoder_path < <( readlink -f "$1"; )
 
-last_hash=""
-last_file=""
 cur_hash=""
 cur_file=""
-cur_timestamp=""
 first_hash=""
 first_file=""
-first_file_owner=""
-first_file_group=""
 
 
 if (( EUID != 0 )); then
@@ -73,18 +68,16 @@ DeDuplicate() {
     while read -rst5 cur_hash cur_ts cur_file; do
 
         if [[ "${cur_hash}" == "${first_hash}" ]]; then
-            echo "===== DUPE : ${cur_hash} - ${cur_file}"
+            echo "      DUPE : ${cur_hash} - ${cur_file}"
             rm "${cur_file}"
             ln -s "${first_file}" "${cur_file}"
             chown --reference="${first_file}" "${cur_file}"
         else
             first_hash=$cur_hash
             first_file=$cur_file
-            echo "===== ORIG : ${first_hash} - ${first_file}"
+            echo -e "\n===== ORIG : ${first_hash} - ${first_file}"
         fi
 
-#        last_hash=$cur_hash
-#        last_file=$cur_file
     done < $tmpfilelistp2
 }
 
